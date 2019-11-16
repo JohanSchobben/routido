@@ -1,0 +1,18 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button (click)="goBack()" *ngIf="!(isBottom$ | async)">
+    <mat-icon>
+      arrow_back
+    </mat-icon>
+  </button>
+  {{title$ | async}}
+
+  <div class="right">
+    <mat-icon
+      *ngIf="!online"
+      matTooltip="Je bent offline"
+      matToolTipPosition="below">
+      warning
+    </mat-icon>
+  </div>
+
+</mat-toolbar>

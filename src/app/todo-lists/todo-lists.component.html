@@ -1,0 +1,7 @@
+<mat-card>
+  <h1 mat-card-title>Jouw Routido's</h1>
+  <mat-list>
+    <mat-list-item *ngIf="(todoLists$ | async).length === 0">Je hebt geen lijsten</mat-list-item>
+    <mat-list-item *ngFor="let list of todoLists$ | async" (click)="onTodoListClick(list.id)">{{ list.name }}</mat-list-item>
+  </mat-list>
+</mat-card>

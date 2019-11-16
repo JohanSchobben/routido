@@ -1,0 +1,25 @@
+<mat-card>
+  <h3 mat-card-title>Nieuwe todo aanmaken</h3>
+  <mat-form-field>
+    <input matInput placeholder="Naam van lijst" [(ngModel)]="name">
+  </mat-form-field>
+  <small class="mat-error" *ngIf="showNameError">
+    een naam is verplicht
+  </small>
+  <mat-form-field>
+    <input matInput placeholder="Taak toevoegen" (keyup.enter)="addTodo($event)">
+  </mat-form-field>
+  <small class="mat-error" *ngIf="showError">
+    Een taak mag maar een keer voorkomen en moet tekst bevatten
+  </small>
+  <mat-list role="list">
+    <mat-list-item role="listitem" *ngFor="let item of items" (click)="onItemClick(item)">{{item}}</mat-list-item>
+  </mat-list>
+  <div>
+    <button mat-button
+            mat-raised-button
+            color="primary"
+            (click)="onSave()"
+    >Opslaan</button>
+  </div>
+</mat-card>

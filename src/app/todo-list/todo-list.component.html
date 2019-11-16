@@ -1,0 +1,12 @@
+<mat-card>
+  <mat-list>
+    <mat-list-item *ngFor="let task of todoList.tasks;last as last">
+      <mat-checkbox [(checked)]="task.done" (change)="onTaskClick(task)"></mat-checkbox>
+      <span mat-line>{{task.action}}</span>
+      <mat-divider *ngIf="!last"></mat-divider>
+    </mat-list-item>
+    <div>
+      <button mat-button mat-raised-button color="warn" (click)="onDelete()">verwijderen</button>
+    </div>
+  </mat-list>
+</mat-card>
