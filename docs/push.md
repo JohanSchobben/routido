@@ -99,7 +99,7 @@ Push notificatie zijn een krachtig hulpmiddel om de gebruiker op de hoogte te ho
 
 *echter zou in een productie omgeving een gebruiker meerdere apparaten hebben. Deze apparaten hebben een *
 
-In RoutiDo maken we gebruik van 
+In RoutiDo maken we gebruik van een service. Deze service communiceert met `SwPush`, de service van Angular om naar push meldingen te luisteren en erop te reageren. Er wordt via een eigen service mee gecommuniceerd. Op die manier blijft deze logica gescheiden van de views. Dit gebeurd ook in de notificationService hieronder. We hebben een methode om naar de notificatie te luisteren om te registreren op push events.
 
 ```typescript
 import {Inject, Injectable} from '@angular/core';
