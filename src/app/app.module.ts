@@ -61,6 +61,7 @@ import {HttpClientModule} from '@angular/common/http';
         {provide: 'APP_NAME', useValue: 'RoutiDo'},
         {provide: 'DB_NAME', useValue: 'routido-db'},
         {provide: 'DB_VERSION', useValue: 1},
+        {provide: 'VAPID_KEY', useValue: 'BI0PWQYEEOjN8zJ_0Cyr4nPHrV1jVEpcocEynHJpl-X6WSWOsbHK1pD7H0fMmvBO_QITA6rjxZYL2fFdGM8m14s'}
     ],
     bootstrap: [AppComponent]
 })
