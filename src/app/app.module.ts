@@ -58,7 +58,9 @@ import {HttpClientModule} from '@angular/common/http';
         ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
     ],
     providers: [
-        {provide: "APP_NAME", useValue: "RoutiDo"}
+        {provide: 'APP_NAME', useValue: 'RoutiDo'},
+        {provide: 'DB_NAME', useValue: 'routido-db'},
+        {provide: 'DB_VERSION', useValue: 1},
     ],
     bootstrap: [AppComponent]
 })
