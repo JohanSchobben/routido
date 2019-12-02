@@ -1,175 +1,235 @@
-# Web App manifest
+#Service worker
+Voor het maken van een Progressieve Web App heb je een service worker nodig. De service worker is het middelpunt van je applicatie. Hierin kan je keuze maken die effect hebben op je applicatie. De service worker doet op zichzelf niet veel. Dit is een Javascript wat wanneer het eenmaal geregistreerd kan luisteren naar verschillende events. Aan de hand van deze events kun je verschillende acties laten uitvoeren door de gebruiker.
 
-Het geven van een “native” look en feel aan de applicatie kan met web app manifest. Dit is een webmanifest-bestand dat informatie bevat die je browser gebruikt wanneer de applicatie op het startscherm mag worden geïnstalleerd. Als je een webapplicatie die geïnstalleerd is op je homescreen en je opent deze, dan opent deze zichzelf met een splash screen.
+Een service worker is een gewoon Javascript bestand met een paar aanpassingen. Zo draait deze in een andere thread. Hierdoor heeft het geen toegang tot sommige javascript API’s zoals de DOM. Ook draait is een Service worker de browser en niet in een tabblad. Hierdoor kan deze actief blijven zelfs wanneer het tabblad van de browser wordt afgesloten. Dit betekent ook dat er maar instantie van de service worker kan zijn als de browser actief is.
 
-Je maakt in je project een webmanifest-bestand aan. Deze wordt meestal manifest.webmanifest genoemd. Dit bestand heeft dezelfde syntax als json. Hierin bepaal je wat eigenschappen over hoe je app zich moet gedragen. Deze laadt je vervolgens in de head van je browser.
+Om een service te kunnen registreren moet je website draaien vanaf een betrouwbare host. Dit betekent dat de applicatie moet worden geserveerd over https en niet over http. Localhost is een uitzondering. Daarop mag ook een service worker worden geregistreerd, om de applicatie te kunnen ontwikkelen. 
 
-```html
-<head>
-  <title>RoutiDo</title>
-  <link rel="manifest" href="/manifest.webmanifest" />
-  <!-- rest van de head... -->
-</head>
+Verder is een service worker volledig asynchroon. Daarom kunnen onderdelen die synchroon zoals localstorage niet gebruikt worden in de applicatie.
+
+##Levencyclus van een Service Worker
+Een service worker kent een aantal toestanden waarin deze komt in zijn levensduur. Om een service worker op te starten moet je deze registreren. Omdat je niet wilt dat je code breekt in browsers die service workers niet ondersteunen, controleer je eerst of de browser service worker ondersteund.
+
+```javascript
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register("/sw.js");
+}
 ```
-Aan het web app manifest geef je de volgende eigenschappen mee:
-- **Name** De name property geeft de naam van de applicatie aan. Deze wordt gebruikt op het splash screen en wordt weergegeven bij het schakelen tussen apps op android en IOS.
+De service worker zal zichzelf registreren en zal  in de registered toestand terechtkomen. Vervolgens zal hij zichzelf updaten. Als het registreren is gebeurd, zal de browser een nieuwe versie voor het maken het van de applicatie. Eenmaal geïnstalleerd zal de browser kijken of de service worker geactiveerd kan worden. Indien er een oude service worker actief is, kan dit niet en zal het systeem wachten totdat de browser opnieuw wordt opgestart. Als de service worker een tijdje niets heeft gedaan, gaat deze in de IDLE-state. Als de service worker weer iets moet doen zal de browser deze opstarten.
 
-- **Short\_name**
-Deze wordt gebruikt als naam onder het icoontje op android telefoons.
+De toestanden van de service worker worden beter uitgelegd in onderstaand diagram:
+![toestandsdiagram Service Worker](./img/state-serviceworker.png)
 
-- **Start\_url**
-Dit is de url waar je naartoe wordt genavigeerd als je de applicatie opent, vanaf je startscherm.
+Bij het ingaan van deze toestanden vuurt de service worker een aantal events uit. Op deze manier kun je aanhaken op de browser. Hieronder een overzicht van de events en wat je kan doen tijdens dit event.
 
-- **Background\_color**
-De achtergrondkleur van het splash screen van je applicatie. Je vult hier de hex code voor de kleur die je wilt gebruiken.
-
-- **Theme\_color**
- Met de theme\_color eigenschap geef je aan welke kleur statusbalk moet hebben als jouw applicatie wordt gebruikt. Ook wordt deze kleur gebruikt bij het als kleur voor de bovenste balk bij het schakelen tussen applicaties. Ook bij deze vul je de hex code voor de kleur die je wilt gebruiken.
-
-- **Scope**
-De scope waarin de web app manifest zich bevind. Als een pagina wordt geopend die buiten de scope valt zal deze worden geopend in de browser.
-
-- **Display**
-Met display geef je aan op welke manier hoe je applicatie wordt gepresenteerd. Je hebt hiervoor een aantal opties. Dit zijn fullscreen, standalone, minimal-ui en browser.
-
-  Fullscreen zorgt ervoor dat de progressive web app in volledig scherm wordt geopend de browser, Deze heeft mist dan alle browser onderdelen, zoals de url. Ook wordt de statusbalk en de navigatieknoppen verborgen. Deze manier is vooral fijn als je een game maakt in Javascript.
-
-  Standalone verbergt alleen de browser onderdelen zoals de URL-balk. Deze is gebruikelijk voor applicaties, omdat hiermee je webapplicatie het meeste op een native applicatie.
-
-  Met Browser geef je aan dat je de applicatie gewoon als in de de browser wilt openen.
-
-[afbeeldingen van versies]
-
-Om te controleren in welke stand de browser is geopend kan het volgende if statement worden gebruikt:
-  
+- **install** 
+Het install event wordt uitgevoerd, zodra de service worker is geïnstalleerd. Als dit event wordt afgevuurd kun je ervoor kiezen om de bestanden van de server op te halen en op te slaan in de cache van de browser. Op die manier zijn de bestanden altijd beschikbaar ook als de gebruiker niet werkt aan de browser. 
   ```javascript
-  If(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standAlone) {
-      // in this block the app is in standalone mode
-  }
+  // service-worker.js
+  const CACHE_NAME = "todopwa-cache";
+  const CACHED_FILES = [
+    "/",
+    "/index.html",
+    "/js/builder.js",
+    "/js/idb.js",
+    "/js/helper.js",
+    "/js/network.js",
+    "/js/main.js",
+    "/img/plus.svg",
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js",
+    "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js",
+    "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css",
+    "/pages/offline.html",
+  ];
+  
+  self.addEventListener("install", function (event) {
+      event.waitUntil(
+        caches.open(CACHE_NAME)
+          .then(function (cache) {
+            return cache.addAll(CACHED_FILES);
+          })
+      );
+  });
   ```
-  
-  ```css
-  @media all and (display-mode: standalone) {
-      /* Here goes the CSS rules that will only apply if app is running standalone */
-  }
-  
+- **activate** 
+Als een nieuwe versie van de Service worker is geactiveerd wordt het active event afgevuurd. Zo kan je bijvoorbeeld een melding tonen dat de gebruiker gebruik maakt van de nieuwste versie van de service worker. Ook kan je vanaf nu luisteren naar andere events die niet worden afgevuurd door de levenscyclus, maar door de browser zelf. Bijvoorbeeld het fetch en het push event.
+
+- **fetch** 
+Het fetch event wordt afgevuurd zodra de gebruiker de gebruiker een bestand probeert op te halen van de server. Over het algemeen gaat het over assets uit de browser. Bijvoorbeeld javascript bestanden, CSS-bestanden of afbeeldingen. Je kan naar deze events luisteren en ervoor kiezen om een gecachte versie van de afbeelding terug te geven.
+
+  ```javascript
+  //service-worker.js
+  self.addEventListener("fetch", function (event) {
+    event.respondWith(
+      caches.match(event.request).then(function(response) {
+        return response || fetch(event.request)
+          .then(function (res) {
+            return caches.open(CACHE_NAME)
+              .then(function (cache) {
+                cache.put(event.request.url, res.clone());
+                return res;
+              });
+          })
+        })
+    )
+  });
   ```
 
-- **Dir**
-hiermee geef je aan hoe de leesrichting aan van je applicatie. Dit is standaard &quot;ltr&quot; (left to right), maar dit kun je ook aanpassen naar &quot;rtl&quot; (right to left).
-
-- **Orientation**
-Hiermee dwing je met welke scherm oriëntatie de applicatie moet worden geopend. De opties die je kan aangeven zijn &quot;landscape&quot; en &quot;portrait&quot;. Als je niets aangeeft kun je de applicatie in beide standen gebruikt (als de it is ingesteld in android).
-
-- **Icons**
-In deze lijst geef je aan welke icoontjes er zijn voor de applicatie, zodat deze gebruikt kunnen worden voor het maken van een applicatie. Een icon bestaat uit de eigenschappen src, type en size. Src is de url van het icoon, type is het type afbeelding en size is de grootte van de afbeelding.
-
-  ```json
-  {
-    "src": "/img/favicon/favicon192.png",
-    "type": "image/png",
-    "sizes": "192x192"
-  }
+- **push**
+Het push event wordt afgevuurd zodra de browser een push bericht ontvangt. Je kan dan van dit bericht een notificatie maken om de gebruiker op de hoogte te houden van over iets.
+  ```javascript
+  //service-worker.js
+  self.addEventListener('push', function(event) {
+    const data = event.data.json();
+  
+    const options = {
+      body: data.title,
+      badge: data.img,
+      icon: data.icon,
+      vibrate: [200, 50, 100],
+      silent: false,
+      data: {
+        url: data.url || '/'
+      },
+      tag: data.tag
+    };
+  
+    event.waitUntil(
+      self.registration.showNotification(data.body, options)
+    );
+  });
   ```
+
+- **notificationclick**
+Het notificationclick event wordt afgevuurd als de gebruiker op de notificatie klikt. Mocht de notificatie acties hebben dan kun je kijken of een van deze is geklikt en hierop acties uitvoeren. Dit bijvoorbeeld zij het openen van de applicatie op een specifieke pagina, maar het kan ook een actie zijn die wordt uitgevoerd door de service worker.
+
+  ```javascript
+  // service worker.js
+  self.addEventListener('notificationclick', function(event) {
+    const notification = event.notification;
+    const action = event.action;
+
+    if (action === 'confirm') {
+      notification.close();
+    } else {
+      event.waitUntil(
+        clients.matchAll()
+          .then(function(cl) {
+            const client = cl.find(function(c) {
+              return c.visibilityState === 'visible';
+            });
   
-  Je geeft over het algemeen meerdere icons aan in verschillende groottes. Het apparaat waarop de webapp dan wordt geïnstalleerd kiest dan zelf de beste grootte om te gebruiken als icoon. Echter wordt het wel aangeraden om een icoon te hebben van minsten 192 bij 192 pixels.
+            if (client !== undefined) {
+              client.navigate(notification.data.url);
+              client.focus();
+            } else {
+              clients.openWindow(notification.data.url);
+            }
+            notification.close();
+          })
+      );
+    }
+  });
+  ```
+
+- **notificationclose**
+Het notificationcanel event is het event wat wordt uitgevoerd als de gebruiker een notificatie annuleert. Dit kan zijn door een swipe op een android telefoon en door op kruisje te drukken op een IOS-telefoon.
+  ```javascript
+  // service-worker.js
+  self.addEventListener('notificationclose', function(event) {
+    console.log('Notification was closed', event);
+  });
+  ```
+
+## offlinesupport
+Met een service worker is het mogelijk om offlinesupport in te stellen voor je wbsite. Zo kan door het combineren van het fetch event en van het install event de statische bestanden teruggeven die de gebruiker nodig heeft voor het gebruiken van de applicatie. 
+
+Er zijn vier verschillende strategien die gebruikt kunnen worden voor het maken van de applicatie. Dit zijn: Network only, cache only, netowork first cache fallback en cache first network fallback.
+
+- **network only**
+Er worden geen bestanden opgeslagen in de cache van de browser. Alle bestanden worden opgehaald van de server. Mocht de gebruiker geen verbinding hebben met het internet dan zullen deze onderdelen niet worden opgehaald. Dit is hetzelfde gedrag als wanneer je geen service worker gebruikt.
+
+  ![network only](./img/network-only.png)
   
-Uiteindelijk heb je een webmanifest-bestand wat er zo uitziet:
+- **cache only**
+Met cache only sla je na het eerste bezoek de bestanden op in de cache. Daarna haal je alle bestanden op uit de cache. Mocht een bestand niet te vinden zijn in de cache dan zal deze niet te laden zijn.
+
+  ![cache only](./img/cache-only.png)
+  
+- **network first, cache fallback**
+Met deze strategie is kun je eerst bestanden ophalen van het internet. Mocht dat niet lukken dan kun je deze ophalen van uit de cache. Het voordeel is dat je op deze manier altijd de nieuwste versie hebt. Ook bestaat de mogelijkheid dat je een fallback kan tonen om de applicatie werkend te krijgen. Toch is deze strategie niet heel populair. Mocht namelijk een gebruiker offline zijn en proberen de bestanden dan zal hij/zij eerst een verzoek make en dat laten falen. Dit falen gebeurt bijvoorbeeld nadat de gebruiker zijn TIMEOUT-tijd van het verzoek is overschreden. Als dit bijvoorbeeld 60 seconde is, zal de gebruiker eerst 60 seconde niets zien voordat de versie uit de cache wordt opgehaald.
+
+  ![network first](./img/network-first.png)
+  
+- **cache first, netowork fallback**
+Dit is de meest gebruikte cache strategie om offlinesupport aan te bieden. Hiermee heeft de gebruiker altijd snel resultaat, omdat de bestanden uit de cache worden opgehaald. Het nadeel is dat de gebruiker bijna altijd de op-één-na-laatste versie van deze bestanden gebruikt. Dit komt omdat de gebruiker de bestanden uit de cache krijgt en daarna worden de bestanden opgehaald uit de browser.
+
+  ![cache-first](./img/cache-first.png)
+
+## browsersupport
+Service workers is een vrij nieuwe techniek, maar wordt al wel in alle moderne browers ondersteund. Je kan dus in alle moderne browsers aangeven dat je bestanden wilt opslaan in de cache en deze wilt tereggeven als de de browser om deze bestanden vraagt.
+
+![browser support service worker](./img/browsersupport-serviceworker.png) 
+
+## service worker in RoutiDo
+We hadden in de branch `setup-web-app-manifest` al gekeken welke onderdelen het commando `ng add @angular/pwa` uitgevoerd. Dit commando registreerd voor on een service worker. Deze service worker wordt automatisch door Angular gemaakt wanneer de applicatie wordt gebouwd.
+
+`@angular/pwa` komt met een service waarmee we notificatie kunnen afhandelen. Zo kunnen we bijvoorbeeld een snackbar tonen voor 5 seconde als de gebruiker een melding krijgt. Standaard maakt angular een notificatie aan die wordt getoond in het systeem. Deze kunnen we in deze service annuleren aangezien de gebruiker de applicatie geopend heeft.
+
+```typescript
+// notification.service.ts
+import {Inject, Injectable} from '@angular/core';
+import {SwPush} from '@angular/service-worker';
+import {HttpClient} from '@angular/common/http';
+import {MatSnackBar} from '@angular/material';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class NotificationService {
+
+  constructor(private swPush: SwPush, @Inject('VAPID_KEY') private vapidKey: string, private http: HttpClient, snackbar: MatSnackBar) {
+    this.swPush.messages
+      .subscribe((msg) => {
+        snackbar.open(JSON.stringify(msg));
+        setTimeout(() => {
+          snackbar.dismiss();
+        }, 5000);
+      });
+  }
+}
+```
+Verder biedt Angular een bestand aan genaamd `ngsw-config.json`. Hierin kan worden geconfigureerd hoe het systeem moet cachen en wat daarvoor moet gebeuren. Zo kan je ervoor kiezen om alle statische bestanden te cachen als de gebruiker de service worker installeerd. of je kan ervoor kiezen om deze op te slaan als deze nodig zijn. Ook kan je aangeven welke bestanden uit dit project gecached moeten worden.
+
 ```json
 {
-  "name": "Routido",
-  "short_name": "Routido",
-  "theme_color": "#285f84",
-  "background_color": "#285f84",
-  "display": "standalone",
-  "scope": "/",
-  "start_url": "/",
-  "icons": [
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
+  "index": "/index.html",
+  "assetGroups": [
     {
-      "src": "assets/icons/icon48.png",
-      "sizes": "48x48",
-      "type": "image/png"
-    },
-    {
-      "src": "assets/icons/icon72.png",
-      "sizes": "72x72",
-      "type": "image/png"
-    },
-    {
-      "src": "assets/icons/icon96.png",
-      "sizes": "96x96",
-      "type": "image/png"
-    },
-    {
-      "src": "assets/icons/icon144.png",
-      "sizes": "144x144",
-      "type": "image/png"
-    },
-    {
-      "src": "assets/icons/icon192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "assets/icons/icon512.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "name": "app",
+      "installMode": "prefetch",
+      "resources": {
+        "files": [
+          "/favicon.ico",
+          "/index.html",
+          "/manifest.webmanifest",
+          "/*.css",
+          "/*.js"
+        ]
+      }
+    }, {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/assets/**",
+          "/*.(eot|svg|cur|jpg|png|webp|gif|otf|ttf|woff|woff2|ani)"
+        ]
+      }
     }
   ]
 }
-
 ```
-## Overige metatags
-
-Niet alle browsers ondersteunen een web app manifest, maar bieden andere mogelijkheden voor het aanpassen van het icoontje of voor het aanpassen van de kleur van de statusbalk en de balk van de browser. Dit kunnen we bereiken door de meta tags toe te voegen aan de browser.
-
-Zo kun je voor oudere versie van Safari voor IOS aangeven welke icoontjes gebruikt moeten worden. Dit kun je ook door voor Edge. Ook daar kan je aangeven welk icoon voor de tegel moet worden gebruikt en wat de achtergrondkleur moet zijn.
-
-De volgende link-elementen kun je toevoegen aan de browser de native web app ook beschikbaar te krijgen op oudere browsers. Alles boven de witregel is voor Apple IOS en alles eronder is voor Microsoft Edge.
-
-
-```html
-<head>
-    <meta charset="utf-8">
-    <title>NgTodo</title>
-    <base href="/">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobule-web-app-status-bar-style" content="#285f84">
-    <meta name="apple-mobule-web-app-title" content="Todo">
-    <link rel="apple-touch-icon" href="/assets/icons/icon48.png" sizes="48x48">
-    <link rel="apple-touch-icon" href="/assets/icons/icon72.png" sizes="72x72">
-    <link rel="apple-touch-icon" href="/assets/icons/icon96.png" sizes="96x96">
-    <link rel="apple-touch-icon" href="/assets/icons/icon144.png" sizes="144x144">
-    <link rel="apple-touch-icon" href="/assets/icons/icon192.png" sizes="192x192">
-    <link rel="apple-touch-icon" href="/assets/icons/icon512.png" sizes="512x512">
-  
-    <meta name="msapplication-TileImage" content="/assets/icon/icon144.png">
-    <meta name="msapplication-TileColor" content="#285f84">
-    <meta name="theme-color" content="#285f84">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&amp;display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="manifest" href="/manifest.webmanifest">
-    <meta name="theme-color" content="#285f84">
-</head>
-```
-
-##browsersupport
-Voor het installeren op het startscherm met behulp van een web app manifest is vooral aan mobiel gedacht. Dat zie je ook terug in het browsersupport. Op desktop wordt dit alleen ondersteund oor Google Chrome. 
-Op mobiel werkt het echter wel op alle vijf de geteste browsers. Er zijn bij alle moderne browsers wel wat kleine onderdelen die niet werken. Zo wordt bijvoorbeeld in alle browser behalve Google Chrome het installed event niet uitgevoerd als de applicatie is geinstalleerd.
-
-![browsersupport Web App manifest](img/browsersupport-webappmanifest.png)
-
-## web app manifest in dit project
-Met behulp van de Angular-CLI kunnnen we van onze applicatie een Progressive web App maken. Om dit te doen moeten we het commando `ng add @angular/pwa` draaien in onze applicatie.
-
-De Angular-CLI doet dan het volgende:
-- voegt een manifest.webmanifest toe aan het project.
-- voegt icons toe aan het project
-- voegt de Web App manifest toe aan de index.html van het project
-- voegt de ServiceWorkerModule toe aan de imports in de AppModules.
-
-Het enige wat we nu nog moeten doen is de eigeschappen aanpassen in het Web App manifest de eigenschappen aanpassen. Ook moeten we de extra meta tags toevoegen aan de applicatie.
