@@ -6,6 +6,7 @@ import {flatMap, map} from 'rxjs/operators';
 import {HeaderService} from '../header.service';
 import {TodoService} from '../todo.service';
 import {Todo} from '../model/Todo.model';
+import {MatSnackBar} from "@angular/material";
 
 @Component({
   selector: 'td-todo-page',
@@ -15,7 +16,7 @@ import {Todo} from '../model/Todo.model';
 export class TodoPageComponent implements OnInit, OnDestroy {
   currentTodListSubscription: Subscription;
   currentTodoList: TodoList;
-  constructor(private route: ActivatedRoute, private headerService: HeaderService, private todoService: TodoService, private router: Router) { }
+  constructor(private route: ActivatedRoute, private headerService: HeaderService, private todoService: TodoService, private router: Router, private snackBar: MatSnackBar) { }
 
   ngOnInit() {
     this.currentTodListSubscription = this.route.paramMap
@@ -35,6 +36,10 @@ export class TodoPageComponent implements OnInit, OnDestroy {
 
   onDelete() {
     this.todoService.deleteTodoList(this.currentTodoList.id);
+      this.snackBar.open('Todo is verwijderd');
+      setTimeout(() => {
+          this.snackBar.dismiss();
+      }, 5000);
     this.router.navigateByUrl('/');
   }
 
