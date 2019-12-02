@@ -1,174 +1,144 @@
-#indexed db
-Voor het opslaan van dynamische content indexedDb worden gemaakt. IndexedDb is een NoSQL database in de browser. IndexedDb wordt door alle moderne browsers ondersteund. Omdat deze vrij uit is werkt deze vooral met callbacks.
+## Push notificaties
+Een push notificatie van je app ziet eruit als een notificatie die je van elke andere app ontvangt. Voor het maken van de applicatie. Push notificaties in de browser bestaan uit twee verschillende API’s. De Notification API en de Push API. 
 
-In indexedDb maak je een Database aan. Een database bevat objectsotres, waarin je kan opslaan wat je maar wilt. Je kan meerdere databases aanmaken in je applicatie, maar over het algemeen heb je er maar één.
+De Notification API is verantwoordelijk voor het tonen van notificaties. De notificaties worden door het besturingssysteem getoond en niet door browser. De notification API kun je in de browser gebruiken, maar ook in de service worker. Zo kun je een notificatie ook tonen als de browser niet gebruikt wordt.
 
-In een database heb je verschillende objectstores. Een objectstore bestaat uit key-value paren, waarbij de value vanalles mag zijn Blobs, objecten, string, numbers en booleans. Je bent vrij om een data vorm te kiezen. Echter wordt wel aangeraden om per object store dezelfde structuur op te slaan en verschillende datasctructuren in verschillende objectstores op te slaan. Dus een object store bijvoorbeeld bezorgingen en een ander voor bezorgbedrijven.
-
-Om data in een object makkelijk te kunnen vinden maak je een index aan. Een index sla je op in zijn eigen objectstore. Deze index bevat een eigenschap van het object, wat gebruikt kan worden om specifieke items op te zoeken in een de object store.
-
-In IndexedDb werk je met transacties. Als meerdere aanpassingen moet uitvoeren doe je  dit in een transacties. Mocht dan een van de acties fout gaan en niet opgeslagen worden, dan wordt de rest ook niet opgeslagen. Hierdoor ben je er zeker van dat alle data in orde blijft.
-
-Om met indexedDb te werken moet je eerst een database openen. Deze database open je door een naam en versienummer op te geven. Als er geen database is met deze naam en versienummer, dan zal deze worden aangemaakt. Tijdens het aanmaken van de database zal dan het upgradeneeded event worden afgevuurd. 
-
-Met het upgradeneeded event kun je callback laten uitvoeren, die je objectstores aanmaakt. Hierin geef je aan welke key je wilt gebruiken voor je data. Dit kan autoincrement zijn die je door de database laat genereren, maar kan ook een eigenschap van je javascript object zijn. Je kan dan ook een index 
+Om een notificatie te tonen moet je eerst toestemming vragen aan de gebruiker. Daarna kun je een notificatie tonen via de service worker. Deze moet je tonen via de service worker. Notificatie worden getoond door het systeem waar de applicatie op draait, niet door de browser.
 
 ```javascript
-let db;
-const request = window.indexedDB.open("todo-db", 1);
-request.onupgradeneeded = function(event){
-  const connection = event.target.result;
-  const todoObjectStore = connection.createObjectStore("todo-store", {keyPath: "id"});
-  todoObjectStore.createIndex("todoindex", "id", {unique: true});
-};
-
-request.onsuccess = function (event) {
-  db = request.result;
-  resolve(db);
-};
-  
-```
-
-Als de verbinding met de database is gemaakt, wordt het success event afgevuurd.  Als je hierop een callback functie bepaald, dan wordt deze een event object meegegeven. Hierin zit het database object wat je weer kan gebruiker voor het maken van aanpassingen aan de database. 
-
-Hieronder een voorbeeld van een voorbeeld van het openen van een database en het ophalen van de data:
-
-```javascript
-const request = window.indexedDB.open("todo-db", 1);
-request.onupgradeneeded = function(event){
- const connection = event.target.result;
- const todoObjectStore = connection.createObjectStore("todo-store", {keyPath: "id"});
- todoObjectStore.createIndex("todoindex", "id", {unique: true});
-};
-
-request.onsuccess = function (event) {
- const db = event.target.result;
- db.transaction(objectStore)
-   .objectStore(objectStore)
-   .getAll()
-   .onsuccess = function(todos){
-    // todos zijn de todolijsten in javascript.
-   }
-};
-```
-Om todolijsten op te slaan kan de add methode worden gebruikt.
-
-```javascript
-const request = db.transaction(objectStore, "readwrite")
-      .objectStore(objectStore)
-      .add(data);
-
-    request.onsuccess = function(event){
-      // de todolijst is succesvol opgeslagen
-    };
-
-    request.onerror = function(event) {
-      // er is iets fout gegsaan waardoor het object niet kan worden opgeslagen.
+// some-file.js (not sevice-worker.js)
+Notification.requestPermission().then(function(permission){
+    if (permission === "granted"){
+	      navigator.serviceWorker.ready
+          .then(function (swreg) {
+            swreg.showNotification("Dit is een melding", {/* Dit object wordt hieronder uitgelegd */})
+          });
     }
+});
+
+```
+Als tweede parameter kun je een object meegeven. Dit object heeft de volgende eigenschappen:
+
+- **Body:** Dit is een extra stuk tekst wat onder de notificatie wordt weergegeven.
+- **Icon:** Dit is een URL naar een afbeelding die aan die als icoon in de notificatie gebruikt kan worden.
+- **Badge:** Dit is ook een URL naar een afbeelding. Deze wordt getoond als er niet genoeg ruimte is: Bijvoorbeeld in de statusbalk van een Android telefoon.
+- **Dir:** de leesrichting van de notificatie.
+- **Lang:** De taal waarin de notificatie wordt weergegeven.
+- **Image:** Dit is een URL naar een afbeelding die aan de zijkant van melding wordt geplaatst.
+- **requireInteraction:** Als deze boolean waar is, zal de melding openblijven, totdat hierop is gedrukt of deze geannuleerd wordt.
+- **Silent:** Als silent waar is, dan wordt de notificatie wel getoond op het scherm, dan zal het scherm niet aanspringen, het notificatiegeluid niet worden afgespeeld en het scherm uitblijven.
+- **Tag:** Deze kun je gebruiken om het notificaties te groeperen. Als de notificatie van dezelfde host afkomt en dezelfde tag heeft zal deze door het systeem worden gegroepeerd.
+- **Vibrate:** een lijst van nummers waarmee je kan aangeven hoe de telefoon moet vibreren. `[100,200,300]` betekent 100 miliseconde aan , vervolgens 200 miliseconde uit en daarna weer 300 miliseconde aan
+- **Actions:** Een lijst van acties die kunnen worden uitgevoerd op de notificatie. Deze komen meestal onder de melding als knoppen te staan. Een actie bestaat uit de volgende punten.
+  - **Action:** dit is het type actie, wat wordt meegegeven aan het notificationclick event.
+  - **Title:** de tekst op de knop.
+  - **Icon** het icoon wat dat voor de browser wordt getoond
+
+Zo kun je de volgende eigenschappen meegeven:
+```javascript
+Notification.requestPermission().then(function(permission){
+    if (permission === "granted"){
+	      navigator.serviceWorker.ready
+          .then(function (swreg) {
+            swreg.showNotification("Todolijst afgerond", {
+              body: "Je hebt todolijst stagevoorstel afgerond",
+              badge: '/img/favicon/favicon96.png',
+              icon: '/icons/chrome.svg',
+              vibrate: [200, 50, 100],
+              silent: false,
+              data: {
+                url: '/'
+              },
+              tag: 'id:1'
+            });
+          });
+    }
+});
+```
+![Push notification example](./img/push-layout.png)
+
+## Het luisteren naar push events.
+
+In de service worker kan worden geluisterd naar het push event. Mocht de browser dan een push notificatie ontvangen, dan kan je hierop reageren. Zo zou je de nieuwe toestand alvast opslaan in indexedDB. Als je dan vervolgens een notiificatie toont om aan te geven dat de status van het pakketje is aangepast, kun je deze gelijk tonen aan de eindgebruiker. 
+
+Het luisteren naar push events in de browser kan op verschillende manieren worden geïmplementeerd. Zo wordt op desktops alleen naar push events geluisterd als de browser open is. In android wordt echter ook naar push events geluisterd als de browser is afgesloten.
+
+```javascript
+//service-worker.js
+self.addEventListener('push', function(event) {
+  const data = event.data.json();
+
+  const options = {
+    body: data.title,
+    badge: data.img,
+    icon: data.icon,
+    vibrate: [200, 50, 100],
+    silent: false,
+    data: {
+      url: data.url || '/'
+    },
+    tag: data.tag
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.body, options)
+  );
+});
 ```
 
-Dit werkt hetzelfde voor het verwijderen en updaten van data.
+## browsersupport
+Push notificatie zijn een krachtig hulpmiddel om de gebruiker op de hoogte te houden van de status van zijn bericht. Echter zijn pushnotificaties nog vrij nieuw en worden nog niet in elke browser ondersteund. Zo kan je Op IOS geen gebruik maken van Push Notificaties. Je kan daardoor als eindgebruiker geen notificaties via de browser ontvangen.
 
-voor verwijderen:
-```javascript
-const request = db.transaction(objectStore, "readwrite")
-  .objectStore(objectStore)
-  .delete(id);
-
-request.onsuccess = function(event){
-  // er ging iets mis tijdens het aanpassen van de data
-};
-
-request.onerror = function(event) {
-  // er ging iets mis met het verwijderen van het object
-};
-```
-
-Voor het updaten van data
-```javascript
+![browser support push](./img/browsersupport-push.png)
 
 
-const request = db.transaction(objectStore, "readwrite")
-  .objectStore(objectStore)
-  .put(data);
+![browser support notification](./img/browsersupport-notification.png)
 
-request.onsuccess = function (event) {
-  // het object is aangepast
-};
+## Push notificaties in  RoutiDo
+*in RoutiDo zijn pushnotificaties uitgeschakeld, dit komt door probkemen met de backend. De focus van dit project ligt ook bij het maken van een PWA en niet bij het maken van een backend.*
 
-request.onerror = function (event) {
-  // er ging iets mis tijden het aanpassen
-};
-```
+*echter zou in een productie omgeving een gebruiker meerdere apparaten hebben. Deze apparaten hebben een *
 
+In RoutiDo maken we gebruik van een service. Deze service communiceert met `SwPush`, de service van Angular om naar push meldingen te luisteren en erop te reageren. Er wordt via een eigen service mee gecommuniceerd. Op die manier blijft deze logica gescheiden van de views. Dit gebeurd ook in de notificationService hieronder. We hebben een methode om naar de notificatie te luisteren om te registreren op push events.
 
-
-## Browsersupport
-
-Indexed db is de oudste API die we gebruiken in dit project. Hij wordt ook in elke browser ondersteund. zelfs in Internet Explorer.
-![browser support indexed db](./img/browsersupport-indexeddb.png) 
-
-##indexed DB in RoutiDo
-Binnen RoutiDo wordt gebruikt gemaakt van een Library genaamd [idb](https://github.com/jakearchibald/idb). Deze is geschreven door Jake Archibald een softwareontwikkelaar die werkt voor Google. Idb, maakt het mogelijk om Promises te gebruiken in plaats van callbacks. Op deze manier is de code leesbaarder en can beter geïntergreerd worden met RXjS. Om deze te communicren met IDB wordt een service gebruikt.
-
-```javascript
+```typescript
 import {Inject, Injectable} from '@angular/core';
-import {openDB} from 'idb';
-import {DBSchema} from 'idb/lib/entry';
-import {TodoList} from './model/TodoList.model';
+import {SwPush} from '@angular/service-worker';
+import {HttpClient} from '@angular/common/http';
+import {MatSnackBar} from '@angular/material';
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
-export class IndexedDbService {
-    db: Promise<any>;
-    constructor(@Inject('DB_NAME') DB_NAME: string, @Inject('DB_VERSION') DB_VERSION: number) {
-        this.db = openDB(DB_NAME, DB_VERSION, {
-            upgrade(db, oldVersion, newVersion, transaction) {
-                const objectStore  = db.createObjectStore('todos', {
-                    keyPath: 'id'
-                });
-                objectStore.createIndex('todoindex', 'id', {unique: true});
-            }
-        });
-    }
+export class NotificationService {
 
-    async store(todoList: TodoList) {
-        const db = await this.db;
-        const action = db.transaction('todos', 'readwrite')
-            .objectStore('todos')
-            .add(todoList.toObject());
-        return await action.done;
-    }
+  constructor(private swPush: SwPush, @Inject('VAPID_KEY') private vapidKey: string, private http: HttpClient, snackbar: MatSnackBar) {
+    this.swPush.messages
+      .subscribe((msg) => {
+        msg.
+        snackbar.open(JSON.stringify(msg));
+        setTimeout(() => {
+          snackbar.dismiss();
+        }, 5000);
+      });
+  }
 
-    async readData(): Promise<TodoList[]> {
-        const db = await this.db;
-        const action = db.transaction('todos', 'readonly')
-            .objectStore('todos');
-        const objects = await action.getAll();
 
-        return objects.map(obj => {
-            const todoList = new TodoList();
-            todoList.id = obj.id;
-            todoList.name = obj.name;
-            todoList.tasks = obj.tasks;
-            return todoList;
-        });
-    }
 
-    async putData(todoList: TodoList) {
-        const db = await this.db;
-        const action = await db.transaction('todos', 'readwrite')
-            .objectStore('todos')
-            .put(todoList.toObject());
-        return await action.done;
-    }
+  get isEnabled(): boolean {
+    return this.swPush.isEnabled;
+  }
 
-    async deleteData(id: string) {
-        const db = await this.db;
-        const action = await db.transaction('todos', 'readwrite')
-            .objectStore('todos')
-            .delete(id);
+  public async requestPermission() {
+    if (this.swPush.isEnabled) {
+      const subscription = await this.swPush.requestSubscription({
+        serverPublicKey: this.vapidKey
+      });
+
+      this.http.post('https://todo-afstuderen.firebaseio.com/subscriptions.json', subscription)
+        .subscribe();
     }
+  }
 }
+
 ```
