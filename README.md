@@ -38,8 +38,6 @@ Met display geef je aan op welke manier hoe je applicatie wordt gepresenteerd. J
 
   Met Browser geef je aan dat je de applicatie gewoon als in de de browser wilt openen.
 
-[afbeeldingen van versies]
-
 Om te controleren in welke stand de browser is geopend kan het volgende if statement worden gebruikt:
   
   ```javascript
@@ -157,7 +155,7 @@ De volgende link-elementen kun je toevoegen aan de browser de native web app ook
 </head>
 ```
 
-##browsersupport
+## browsersupport
 Voor het installeren op het startscherm met behulp van een web app manifest is vooral aan mobiel gedacht. Dat zie je ook terug in het browsersupport. Op desktop wordt dit alleen ondersteund oor Google Chrome. 
 Op mobiel werkt het echter wel op alle vijf de geteste browsers. Er zijn bij alle moderne browsers wel wat kleine onderdelen die niet werken. Zo wordt bijvoorbeeld in alle browser behalve Google Chrome het installed event niet uitgevoerd als de applicatie is geinstalleerd.
 
