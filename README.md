@@ -55,7 +55,7 @@ Notification.requestPermission().then(function(permission){
     }
 });
 ```
-![Push notification example](./img/push-layout.png)
+![Push notification example](docs/img/push-layout.png)
 
 ## Het luisteren naar push events.
 
@@ -89,10 +89,10 @@ self.addEventListener('push', function(event) {
 ## browsersupport
 Push notificatie zijn een krachtig hulpmiddel om de gebruiker op de hoogte te houden van de status van zijn bericht. Echter zijn pushnotificaties nog vrij nieuw en worden nog niet in elke browser ondersteund. Zo kan je Op IOS geen gebruik maken van Push Notificaties. Je kan daardoor als eindgebruiker geen notificaties via de browser ontvangen.
 
-![browser support push](./img/browsersupport-push.png)
+![browser support push](docs/img/browsersupport-push.png)
 
 
-![browser support notification](./img/browsersupport-notification.png)
+![browser support notification](docs/img/browsersupport-notification.png)
 
 ## Push notificaties in  RoutiDo
 *in RoutiDo zijn pushnotificaties uitgeschakeld, dit komt door probkemen met de backend. De focus van dit project ligt ook bij het maken van een PWA en niet bij het maken van een backend.*
