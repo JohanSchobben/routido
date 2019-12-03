@@ -18,7 +18,7 @@ if ('serviceWorker' in navigator) {
 De service worker zal zichzelf registreren en zal  in de registered toestand terechtkomen. Vervolgens zal hij zichzelf updaten. Als het registreren is gebeurd, zal de browser een nieuwe versie voor het maken het van de applicatie. Eenmaal geïnstalleerd zal de browser kijken of de service worker geactiveerd kan worden. Indien er een oude service worker actief is, kan dit niet en zal het systeem wachten totdat de browser opnieuw wordt opgestart. Als de service worker een tijdje niets heeft gedaan, gaat deze in de IDLE-state. Als de service worker weer iets moet doen zal de browser deze opstarten.
 
 De toestanden van de service worker worden beter uitgelegd in onderstaand diagram:
-![toestandsdiagram Service Worker](./img/state-serviceworker.png)
+![toestandsdiagram Service Worker](docs/img/state-serviceworker.png)
 
 Bij het ingaan van deze toestanden vuurt de service worker een aantal events uit. Op deze manier kun je aanhaken op de browser. Hieronder een overzicht van de events en wat je kan doen tijdens dit event.
 
@@ -150,27 +150,27 @@ Er zijn vier verschillende strategien die gebruikt kunnen worden voor het maken 
 - **network only**
 Er worden geen bestanden opgeslagen in de cache van de browser. Alle bestanden worden opgehaald van de server. Mocht de gebruiker geen verbinding hebben met het internet dan zullen deze onderdelen niet worden opgehaald. Dit is hetzelfde gedrag als wanneer je geen service worker gebruikt.
 
-  ![network only](./img/network-only.png)
+  ![network only](docs/img/network-only.png)
   
 - **cache only**
 Met cache only sla je na het eerste bezoek de bestanden op in de cache. Daarna haal je alle bestanden op uit de cache. Mocht een bestand niet te vinden zijn in de cache dan zal deze niet te laden zijn.
 
-  ![cache only](./img/cache-only.png)
+  ![cache only](docs/img/cache-only.png)
   
 - **network first, cache fallback**
 Met deze strategie is kun je eerst bestanden ophalen van het internet. Mocht dat niet lukken dan kun je deze ophalen van uit de cache. Het voordeel is dat je op deze manier altijd de nieuwste versie hebt. Ook bestaat de mogelijkheid dat je een fallback kan tonen om de applicatie werkend te krijgen. Toch is deze strategie niet heel populair. Mocht namelijk een gebruiker offline zijn en proberen de bestanden dan zal hij/zij eerst een verzoek make en dat laten falen. Dit falen gebeurt bijvoorbeeld nadat de gebruiker zijn TIMEOUT-tijd van het verzoek is overschreden. Als dit bijvoorbeeld 60 seconde is, zal de gebruiker eerst 60 seconde niets zien voordat de versie uit de cache wordt opgehaald.
 
-  ![network first](./img/network-first.png)
+  ![network first](docs/img/network-first.png)
   
 - **cache first, netowork fallback**
 Dit is de meest gebruikte cache strategie om offlinesupport aan te bieden. Hiermee heeft de gebruiker altijd snel resultaat, omdat de bestanden uit de cache worden opgehaald. Het nadeel is dat de gebruiker bijna altijd de op-één-na-laatste versie van deze bestanden gebruikt. Dit komt omdat de gebruiker de bestanden uit de cache krijgt en daarna worden de bestanden opgehaald uit de browser.
 
-  ![cache-first](./img/cache-first.png)
+  ![cache-first](docs/img/cache-first.png)
 
 ## browsersupport
 Service workers is een vrij nieuwe techniek, maar wordt al wel in alle moderne browers ondersteund. Je kan dus in alle moderne browsers aangeven dat je bestanden wilt opslaan in de cache en deze wilt tereggeven als de de browser om deze bestanden vraagt.
 
-![browser support service worker](./img/browsersupport-serviceworker.png) 
+![browser support service worker](docs/img/browsersupport-serviceworker.png) 
 
 ## service worker in RoutiDo
 We hadden in de branch `setup-web-app-manifest` al gekeken welke onderdelen het commando `ng add @angular/pwa` uitgevoerd. Dit commando registreerd voor on een service worker. Deze service worker wordt automatisch door Angular gemaakt wanneer de applicatie wordt gebouwd.
