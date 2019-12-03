@@ -106,7 +106,7 @@ request.onerror = function (event) {
 ## Browsersupport
 
 Indexed db is de oudste API die we gebruiken in dit project. Hij wordt ook in elke browser ondersteund. zelfs in Internet Explorer.
-![browser support indexed db](./img/browsersupport-indexeddb.png) 
+![browser support indexed db](docs/img/browsersupport-indexeddb.png) 
 
 ##indexed DB in RoutiDo
 Binnen RoutiDo wordt gebruikt gemaakt van een Library genaamd [idb](https://github.com/jakearchibald/idb). Deze is geschreven door Jake Archibald een softwareontwikkelaar die werkt voor Google. Idb, maakt het mogelijk om Promises te gebruiken in plaats van callbacks. Op deze manier is de code leesbaarder en can beter geïntergreerd worden met RXjS. Om deze te communicren met IDB wordt een service gebruikt.
@@ -114,7 +114,6 @@ Binnen RoutiDo wordt gebruikt gemaakt van een Library genaamd [idb](https://gith
 ```javascript
 import {Inject, Injectable} from '@angular/core';
 import {openDB} from 'idb';
-import {DBSchema} from 'idb/lib/entry';
 import {TodoList} from './model/TodoList.model';
 
 @Injectable({
