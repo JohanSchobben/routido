@@ -161,7 +161,7 @@ De volgende link-elementen kun je toevoegen aan de browser de native web app ook
 Voor het installeren op het startscherm met behulp van een web app manifest is vooral aan mobiel gedacht. Dat zie je ook terug in het browsersupport. Op desktop wordt dit alleen ondersteund oor Google Chrome. 
 Op mobiel werkt het echter wel op alle vijf de geteste browsers. Er zijn bij alle moderne browsers wel wat kleine onderdelen die niet werken. Zo wordt bijvoorbeeld in alle browser behalve Google Chrome het installed event niet uitgevoerd als de applicatie is geinstalleerd.
 
-![browsersupport Web App manifest](img/browsersupport-webappmanifest.png)
+![browsersupport Web App manifest](docs/img/browsersupport-webappmanifest.png)
 
 ## web app manifest in dit project
 Met behulp van de Angular-CLI kunnnen we van onze applicatie een Progressive web App maken. Om dit te doen moeten we het commando `ng add @angular/pwa` draaien in onze applicatie.
