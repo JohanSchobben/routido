@@ -1,18 +1,17 @@
 #indexed db
-Voor het opslaan van dynamische content indexedDb worden gemaakt. IndexedDb is een NoSQL database in de browser. IndexedDb wordt door alle moderne browsers ondersteund. Omdat deze vrij uit is werkt deze vooral met callbacks.
+Voor het opslaan van dynamische content indexedDb worden gemaakt. IndexedDb is een NoSQL database in de browser. IndexedDb wordt door alle moderne browsers ondersteund. Omdat deze functionaliteit vrij oud is werkt deze vooral met [callbacks](https://developer.mozilla.org/en-US/docs/Glossary/Callback_function).
 
-In indexedDb maak je een Database aan. Een database bevat objectsotres, waarin je kan opslaan wat je maar wilt. Je kan meerdere databases aanmaken in je applicatie, maar over het algemeen heb je er maar één.
+In indexedDb wordt een Database aangemaakt. Een database bevat objectsotres, waarin de dat wordt opgeslagen. Er kunenn meerdere databases worden aangemaakt in een applicatie, maar over het algemeen wordt er maar gebruikt.
 
-In een database heb je verschillende objectstores. Een objectstore bestaat uit key-value paren, waarbij de value vanalles mag zijn Blobs, objecten, string, numbers en booleans. Je bent vrij om een data vorm te kiezen. Echter wordt wel aangeraden om per object store dezelfde structuur op te slaan en verschillende datasctructuren in verschillende objectstores op te slaan. Dus een object store bijvoorbeeld bezorgingen en een ander voor bezorgbedrijven.
+In een database heb je verschillende objectstores. Een objectstore bestaat uit key-value paren, waarbij de value vanalles mag zijn Blobs, objecten, string, numbers en booleans. Een objectstore heeft hiervoor geen resctricties. Echter wordt wel aangeraden om per objectstore dezelfde structuur op te slaan en voor verschillende datasctructuren in verschillende objectstores te gebruiken. Dus een objectstore bijvoorbeeld bezorgingen en een ander voor afbeeldingen van afleverinstructies.
 
-Om data in een object makkelijk te kunnen vinden maak je een index aan. Een index sla je op in zijn eigen objectstore. Deze index bevat een eigenschap van het object, wat gebruikt kan worden om specifieke items op te zoeken in een de object store.
+Om data in een objectstore makkelijk te kunnen vinden wordt gebruik gemaakt van indexen. Een index opgeslagen in zijn eigen objectstore. Deze index bevat een eigenschap van het object, wat gebruikt kan worden om specifieke items op te zoeken in een de object store.
 
 In IndexedDb werk je met transacties. Als meerdere aanpassingen moet uitvoeren doe je  dit in een transacties. Mocht dan een van de acties fout gaan en niet opgeslagen worden, dan wordt de rest ook niet opgeslagen. Hierdoor ben je er zeker van dat alle data in orde blijft.
 
-Om met indexedDb te werken moet je eerst een database openen. Deze database open je door een naam en versienummer op te geven. Als er geen database is met deze naam en versienummer, dan zal deze worden aangemaakt. Tijdens het aanmaken van de database zal dan het upgradeneeded event worden afgevuurd. 
+Om met indexedDb te werken moet eerst een verbinding worden gemaakt met de database. Deze database open je door een naam en versienummer op te geven. Als er geen database is met deze naam en versienummer, dan zal deze worden aangemaakt. Tijdens het aanmaken van de database zal dan het upgradeneeded event worden afgevuurd. 
 
-Met het upgradeneeded event kun je callback laten uitvoeren, die je objectstores aanmaakt. Hierin geef je aan welke key je wilt gebruiken voor je data. Dit kan autoincrement zijn die je door de database laat genereren, maar kan ook een eigenschap van je javascript object zijn. Je kan dan ook een index 
-
+Met het upgradeneeded event kan een functie worden uitgevoerd, die de objectstores aanmaakt. Ook wordt aangegeven wat de key voor je data. Dit kan auto increment zijn die je door de database laat genereren, maar kan ook een eigenschap van het Javascript object zijn.
 ```javascript
 let db;
 const request = window.indexedDB.open("todo-db", 1);
@@ -26,12 +25,10 @@ request.onsuccess = function (event) {
   db = request.result;
   resolve(db);
 };
-  
 ```
+Als de verbinding met de database is gemaakt, wordt het success event afgevuurd.  Hierop kan ook een callback worden bepaald, Aan deze callback wordt een event object meegegeven. Hierin zit het database object wat weer kan worden gebruikt voor het maken van aanpassingen aan de database. 
 
-Als de verbinding met de database is gemaakt, wordt het success event afgevuurd.  Als je hierop een callback functie bepaald, dan wordt deze een event object meegegeven. Hierin zit het database object wat je weer kan gebruiker voor het maken van aanpassingen aan de database. 
-
-Hieronder een voorbeeld van een voorbeeld van het openen van een database en het ophalen van de data:
+Hieronder een voorbeeld voor het openen van een database en het ophalen van de data:
 
 ```javascript
 const request = window.indexedDB.open("todo-db", 1);
@@ -42,12 +39,13 @@ request.onupgradeneeded = function(event){
 };
 
 request.onsuccess = function (event) {
+ // er is een verbinding met de database
  const db = event.target.result;
  db.transaction(objectStore)
    .objectStore(objectStore)
    .getAll()
    .onsuccess = function(todos){
-    // todos zijn de todolijsten in javascript.
+    // todos zijn de todolijsten als javascript object.
    }
 };
 ```
@@ -105,7 +103,7 @@ request.onerror = function (event) {
 
 ## Browsersupport
 
-Indexed db is de oudste API die we gebruiken in dit project. Hij wordt ook in elke browser ondersteund. zelfs in Internet Explorer.
+Indexed db is de oudste API die gebruikt wordt in RoutiDo. Indexeddb wordt in elke browser ondersteund, zelfs in Internet Explorer.
 ![browser support indexed db](docs/img/browsersupport-indexeddb.png) 
 
 ##indexed DB in RoutiDo
