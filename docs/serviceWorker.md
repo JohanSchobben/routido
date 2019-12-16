@@ -202,9 +202,9 @@ Service workers is een vrij nieuwe techniek, maar wordt al wel in alle moderne b
 ![browser support service worker](docs/img/browsersupport-serviceworker.png) 
 
 ## service worker in RoutiDo
-We hadden in de branch `setup-web-app-manifest` al gekeken welke onderdelen het commando `ng add @angular/pwa` uitgevoerd. Dit commando registreerd voor on een service worker. Deze service worker wordt automatisch door Angular gemaakt wanneer de applicatie wordt gebouwd.
+In de branch [setup-web-app-manifest](https://github.com/JohanSchobben/routido/tree/setup-manifest.json) is het commando `ng add @angular/pwa` uitgevoerd. Dit commando registreerd voor on een service worker. Deze service worker wordt automatisch door Angular gemaakt wanneer de applicatie wordt gebouwd.
 
-`@angular/pwa` komt met een service waarmee we notificatie kunnen afhandelen. Zo kunnen we bijvoorbeeld een snackbar tonen voor 5 seconde als de gebruiker een melding krijgt. Standaard maakt angular een notificatie aan die wordt getoond in het systeem. Deze kunnen we in deze service annuleren aangezien de gebruiker de applicatie geopend heeft.
+`@angular/pwa` komt met een service waarmee we notificatie kunnen afhandelen. Zo kunnen we bijvoorbeeld een snackbar tonen voor 5 seconde als de gebruiker een melding krijgt. Standaard maakt angular een notificatie aan die wordt getoond in het systeem. Deze kunnen we in deze service annuleren aangezien de gebruiker de applicatie geopend heeft. in het voorbeeld hieronder wordt van deze service gebruikt gemaakt.
 
 ```typescript
 // notification.service.ts
